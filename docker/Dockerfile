@@ -13,7 +13,7 @@ WORKDIR $HTTPD_PREFIX
 # https://httpd.apache.org/docs/2.4/install.html#requirements
 RUN set -eux; \
 	yum update; \
-	yum install -y --no-install-recommends \
+	yum install -y \
 # https://github.com/docker-library/httpd/issues/214
 		ca-certificates \
 		libaprutil1-ldap \
@@ -34,7 +34,7 @@ RUN set -eux; \
 	# mod_http2 mod_lua mod_proxy_html mod_xml2enc
 	# https://anonscm.debian.org/cgit/pkg-apache/apache2.git/tree/debian/control?id=adb6f181257af28ee67af15fc49d2699a0080d4c
 	yum update; \
-	yum install -y --no-install-recommends \
+	yum install -y \
 		bzip2 \
 		dpkg-dev \
 		gcc \
