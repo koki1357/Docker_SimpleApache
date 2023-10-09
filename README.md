@@ -7,6 +7,8 @@ As mentioned above, there are some packages that are not compatible.
 
 
 - Debian系とRHEL系でのパッケージの違いをchatgptに聞いた結果を整理(誤りある可能性有り)
+
+
 | Debian系           | RHEL系              | 説明                                                                                                      |
 |-------------------|--------------------|---------------------------------------------------------------------------------------------------------|
 | ca-certificates   | ca-certificates    | SSL証明書のコレクション。両方のディストリビューションで利用可能。                                                  |
