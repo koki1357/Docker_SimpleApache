@@ -39,7 +39,8 @@ As mentioned above, there are some packages that are not compatible.
 ---
 
 
-- Debian系とRHEL系でのパッケージの違いをchatgptに聞いた結果を(誤りある可能性有り)
+- Debian系とRHEL系でのパッケージの違いをchatgptに聞いた結果(誤りある可能性有り)
+- As a result of asking chatgpt about the differences in packages between Debian and RHEL systems (there may be errors)
 
 
 | Debian系           | RHEL系              | 説明                                                                                                      |
