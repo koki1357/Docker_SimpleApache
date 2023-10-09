@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM oraclelinux:9
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 #RUN groupadd -r www-data && useradd -r --create-home -g www-data www-data
@@ -152,18 +152,7 @@ RUN set -eux; \
 	grep -E '^\s*User www-data$' "$HTTPD_PREFIX/conf/httpd.conf"; \
 	grep -E '^\s*Group www-data$' "$HTTPD_PREFIX/conf/httpd.conf"; \
 	\
-# reset apt-mark's "manual" list so that "purge --auto-remove" will remove all build dependencies
-	apt-mark auto '.*' > /dev/null; \
-	[ -z "$savedAptMark" ] || apt-mark manual $savedAptMark; \
-	find /usr/local -type f -executable -exec ldd '{}' ';' \
-		| awk '/=>/ { so = $(NF-1); if (index(so, "/usr/local/") == 1) { next }; gsub("^/(usr/)?", "", so); print so }' \
-		| sort -u \
-		| xargs -r dpkg-query --search \
-		| cut -d: -f1 \
-		| sort -u \
-		| xargs -r apt-mark manual \
-	; \
-	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+# yumで不要な依存関係を削除する場合、yum autoremoveをこの行に記載する。
 	\
 # smoke test
 	httpd -v
