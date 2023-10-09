@@ -1,16 +1,45 @@
-- [公式のApacheのdockerイメージ](https://github.com/docker-library/httpd/blob/242f3c62ba1ceee0a3633045fc4fd9277cb86cd3/2.4/Dockerfile)がDebianベースで動くように書かれているので、RHEL系に読み替えて動かしてみた。最低限動くようにはなった。
+- [Apache公式のDockerfile](https://github.com/docker-library/httpd/blob/242f3c62ba1ceee0a3633045fc4fd9277cb86cd3/2.4/Dockerfile)がDebian系のOSで動くように書かれているので、RHEL系に読み替えつつ、Dockerfileと起動用のスクリプトを書き換えた。
 以下に記載するように、対応していないパッケージもある。
 
 
 - [ Official Apache docker image](https://github.com/docker-library/httpd/blob/242f3c62ba1ceee0a3633045fc4fd9277cb86cd3/2.4/Dockerfile) runs on Debian, so I changed it to RHEL and looked at it. It almost started moving.
 As mentioned above, there are some packages that are not compatible.
 
+---
 
-- コンテナの起動方法
-  - 本プロジェクトをローカルにクローン後、`Docker_SimpleApache/docker/`にディレクトリを移動し、イメージをビルドし、コンテナ起動するとApacheコンテナが起動する。
+- Apacheコンテナの起動方法
+  - 本プロジェクトをローカルにクローン後、`Docker_SimpleApache/docker/`にディレクトリを移動し、イメージをビルド後、コンテナ起動するとApacheコンテナがフォアグラウンドで起動する。(2023/10/9時点では、DockerHubにはPUSHしていない)
+
+- How to start Apache container
+  - After cloning this project locally, move the directory to `Docker_SimpleApache/docker/`, build the image, and start the container, the Apache container will start in the foreground. (As of October 9, 2023, it has not been pushed to DockerHub)
+
+---
+
+- このプロジェクトでやったこと
+  - 基本的なDebian⇒RHEL対応
+    - パッケージ管理コマンドをapt⇒yum化
+    - パッケージ名をapt⇒yum化
+    - ログの標準出力化
+    - Apacheのプロセス起動
+- やっていないこと
+  - GPG鍵の検証
+  - ハッシュ値が異なる場合のパッチ当て(最低限ソースからビルドしているので、まず動かす上では優先度が低く、今回は実施していない。今後実施予定)
+
+- What we did in this project
+  - Basic Debian⇒RHEL support
+    - Change package management command from apt to yum
+    - Change package name from apt to yum
+    - Log standard output
+    - Apache process startup
+- What I haven't done
+  - GPG key verification
+  - Patch application when the hash values ​​are different (at least since it is built from source, it is a low priority to get it working first, so it is not implemented this time. Planned to be implemented in the future)
 
 
-- Debian系とRHEL系でのパッケージの違いをchatgptに聞いた結果を整理(誤りある可能性有り)
+---
+
+
+- Debian系とRHEL系でのパッケージの違いをchatgptに聞いた結果を(誤りある可能性有り)
 
 
 | Debian系           | RHEL系              | 説明                                                                                                      |
