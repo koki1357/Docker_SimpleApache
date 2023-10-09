@@ -12,15 +12,15 @@ WORKDIR $HTTPD_PREFIX
 # install httpd runtime dependencies
 # https://httpd.apache.org/docs/2.4/install.html#requirements
 RUN set -eux; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends \
+	yum update; \
+	yum install -y --no-install-recommends \
 # https://github.com/docker-library/httpd/issues/214
 		ca-certificates \
 		libaprutil1-ldap \
 # https://github.com/docker-library/httpd/issues/209
 		libldap-common \
 	; \
-	rm -rf /var/lib/apt/lists/*
+	yum clean
 
 ENV HTTPD_VERSION 2.4.57
 ENV HTTPD_SHA256 dbccb84aee95e095edfbb81e5eb926ccd24e6ada55dcd83caecb262e5cf94d2a
@@ -33,9 +33,8 @@ RUN set -eux; \
 	\
 	# mod_http2 mod_lua mod_proxy_html mod_xml2enc
 	# https://anonscm.debian.org/cgit/pkg-apache/apache2.git/tree/debian/control?id=adb6f181257af28ee67af15fc49d2699a0080d4c
-	savedAptMark="$(apt-mark showmanual)"; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends \
+	yum update; \
+	yum install -y --no-install-recommends \
 		bzip2 \
 		dpkg-dev \
 		gcc \
@@ -55,7 +54,7 @@ RUN set -eux; \
 		wget \
 		zlib1g-dev \
 	; \
-	rm -r /var/lib/apt/lists/*; \
+	yum clean \
 	\
 	ddist() { \
 		local f="$1"; shift; \
@@ -152,7 +151,7 @@ RUN set -eux; \
 	grep -E '^\s*User www-data$' "$HTTPD_PREFIX/conf/httpd.conf"; \
 	grep -E '^\s*Group www-data$' "$HTTPD_PREFIX/conf/httpd.conf"; \
 	\
-# yumで不要な依存関係を削除する場合、yum autoremoveをこの行に記載する。
+# yumで不要な依存関係を削除する場合、yum autoremove -yをこの行に記載する。
 	\
 # smoke test
 	httpd -v
