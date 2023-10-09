@@ -3,10 +3,13 @@ FROM oraclelinux:9
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 #RUN groupadd -r www-data && useradd -r --create-home -g www-data www-data
 
-ENV HTTPD_PREFIX /usr/local/apache2
+ENV HTTPD_PREFIX /opt/apache/httpd
 ENV PATH $HTTPD_PREFIX/bin:$PATH
-RUN mkdir -p "$HTTPD_PREFIX" \
+RUN groupadd -g 300 www-data && \
+    	useradd -u 300 -g www-data -d /home/www-data -s /bin/bash www-data && \
+	mkdir -p "$HTTPD_PREFIX" \
 	&& chown www-data:www-data "$HTTPD_PREFIX"
+
 WORKDIR $HTTPD_PREFIX
 
 # install httpd runtime dependencies
@@ -16,9 +19,9 @@ RUN set -eux; \
 	yum install -y \
 # https://github.com/docker-library/httpd/issues/214
 		ca-certificates \
-		libaprutil1-ldap \
+		apr-util-ldap \
 # https://github.com/docker-library/httpd/issues/209
-		libldap-common \
+		openldap \
 	; \
 	yum clean all
 
@@ -30,35 +33,38 @@ ENV HTTPD_PATCHES="rewrite-windows-testchar-h.patch 1d5620574fa03b483262dc5b9a66
 
 # see https://httpd.apache.org/docs/2.4/install.html#requirements
 RUN set -eux; \
-	\
 	# mod_http2 mod_lua mod_proxy_html mod_xml2enc
 	# https://anonscm.debian.org/cgit/pkg-apache/apache2.git/tree/debian/control?id=adb6f181257af28ee67af15fc49d2699a0080d4c
 	yum update; \
 	yum install -y \
 		bzip2 \
-		dpkg-dev \
+		rpm-build \
 		gcc \
-		gnupg \
-		libapr1-dev \
-		libaprutil1-dev \
-		libbrotli-dev \
-		libcurl4-openssl-dev \
-		libjansson-dev \
-		liblua5.2-dev \
-		libnghttp2-dev \
-		libpcre3-dev \
-		libssl-dev \
-		libxml2-dev \
+		gnupg2 \
+		apr-devel \
+		apr-util-devel \
+		brotli-devel \
+		libcurl-devel \
+#
+# 以下の3つのパッケージはyumになかったので、一旦省略。基本動作には問題なし。
+# HTTP/2.0に対応したい場合は、パッケージの個別設定が必要。
+#
+#		jansson-devel \
+#		lua-devel \
+#		libnghttp2-devel \
+		pcre-devel \
+		openssl-devel \
+		libxml2-devel \
 		make \
 		patch \
 		wget \
-		zlib1g-dev \
+		zlib-devel \
 	; \
-	yum clean all\
+#	yum clean all;
 	\
 	ddist() { \
 		local f="$1"; shift; \
-		local distFile="$1"; shift; \
+ 		local distFile="$1"; shift; \
 		local success=; \
 		local distUrl=; \
 		for distUrl in \
@@ -83,45 +89,13 @@ RUN set -eux; \
 	\
 # see https://httpd.apache.org/download.cgi#verify
 	ddist 'httpd.tar.bz2.asc' "httpd/httpd-$HTTPD_VERSION.tar.bz2.asc"; \
-	export GNUPGHOME="$(mktemp -d)"; \
-# $ docker run --rm buildpack-deps:bookworm-curl bash -c 'wget -qO- https://downloads.apache.org/httpd/KEYS | gpg --batch --import &> /dev/null && gpg --batch --list-keys --with-fingerprint --with-colons' | awk -F: '$1 == "pub" && $2 == "-" { pub = 1 } pub && $1 == "fpr" { fpr = $10 } $1 == "sub" { pub = 0 } pub && fpr && $1 == "uid" && $2 == "-" { print "#", $10; print "\t\t" fpr " \\"; pub = 0 }'
-	for key in \
-# Rodent of Unusual Size (DSA) <coar@ACM.Org>
-		DE29FB3971E71543FD2DC049508EAEC5302DA568 \
-# Rodent of Unusual Size <coar@ACM.Org>
-		13155B0E9E634F42BF6C163FDDBA64BA2C312D2F \
-# Jim Jagielski <jim@apache.org>
-		8B39757B1D8A994DF2433ED58B3A601F08C975E5 \
-	; do \
-		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
-	done; \
-	gpg --batch --verify httpd.tar.bz2.asc httpd.tar.bz2; \
-	gpgconf --kill all; \
-	rm -rf "$GNUPGHOME" httpd.tar.bz2.asc; \
 	\
 	mkdir -p src; \
 	tar -xf httpd.tar.bz2 -C src --strip-components=1; \
 	rm httpd.tar.bz2; \
 	cd src; \
-	\
-	patches() { \
-		while [ "$#" -gt 0 ]; do \
-			local patchFile="$1"; shift; \
-			local patchSha256="$1"; shift; \
-			ddist "$patchFile" "httpd/patches/apply_to_$HTTPD_VERSION/$patchFile"; \
-			echo "$patchSha256 *$patchFile" | sha256sum -c -; \
-			patch -p0 < "$patchFile"; \
-			rm -f "$patchFile"; \
-		done; \
-	}; \
-	patches $HTTPD_PATCHES; \
-	\
-	gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
-	CFLAGS="$(dpkg-buildflags --get CFLAGS)"; \
-	CPPFLAGS="$(dpkg-buildflags --get CPPFLAGS)"; \
-	LDFLAGS="$(dpkg-buildflags --get LDFLAGS)"; \
+
 	./configure \
-		--build="$gnuArch" \
 		--prefix="$HTTPD_PREFIX" \
 		--enable-mods-shared=reallyall \
 		--enable-mpms-shared=all \
@@ -129,9 +103,6 @@ RUN set -eux; \
 # - https://salsa.debian.org/apache-team/apache2/blob/87db7de4e59683fb03e97900f078d06ef2292748/debian/rules#L19-21
 # - https://salsa.debian.org/apache-team/apache2/blob/87db7de4e59683fb03e97900f078d06ef2292748/debian/rules#L115
 		--enable-pie \
-		CFLAGS="-pipe $CFLAGS" \
-		CPPFLAGS="$CPPFLAGS" \
-		LDFLAGS="-Wl,--as-needed $LDFLAGS" \
 	; \
 	make -j "$(nproc)"; \
 	make install; \
@@ -159,7 +130,9 @@ RUN set -eux; \
 # https://httpd.apache.org/docs/2.4/stopping.html#gracefulstop
 STOPSIGNAL SIGWINCH
 
-COPY httpd-foreground /usr/local/bin/
+COPY httpd-foreground $HTTPD_PREFIX/bin
+RUN chmod 755 $HTTPD_PREFIX/bin/httpd-foreground
 
 EXPOSE 80
+
 CMD ["httpd-foreground"]

@@ -2,6 +2,6 @@
 set -e
 
 # Apache gets grumpy about PID files pre-existing
-rm -f /opt/apache/httpdlogs/httpd.pid
+rm -f /opt/apache/httpd/logs/httpd.pid
 
 exec httpd -DFOREGROUND "$@"
