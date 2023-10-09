@@ -20,7 +20,7 @@ RUN set -eux; \
 # https://github.com/docker-library/httpd/issues/209
 		libldap-common \
 	; \
-	yum clean
+	yum clean all
 
 ENV HTTPD_VERSION 2.4.57
 ENV HTTPD_SHA256 dbccb84aee95e095edfbb81e5eb926ccd24e6ada55dcd83caecb262e5cf94d2a
@@ -54,7 +54,7 @@ RUN set -eux; \
 		wget \
 		zlib1g-dev \
 	; \
-	yum clean \
+	yum clean all\
 	\
 	ddist() { \
 		local f="$1"; shift; \
