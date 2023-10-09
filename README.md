@@ -1,12 +1,12 @@
-##[公式のApacheのdockerイメージ](https://github.com/docker-library/httpd/blob/242f3c62ba1ceee0a3633045fc4fd9277cb86cd3/2.4/Dockerfile)がDebianベースで動くように書かれているので、RHEL系に読み替えて動かしてみた。最低限動くようにはなった。
+## [公式のApacheのdockerイメージ](https://github.com/docker-library/httpd/blob/242f3c62ba1ceee0a3633045fc4fd9277cb86cd3/2.4/Dockerfile)がDebianベースで動くように書かれているので、RHEL系に読み替えて動かしてみた。最低限動くようにはなった。
 以下に記載するように、対応していないパッケージもある。
 
 
-##[Official Apache docker image](https://github.com/docker-library/httpd/blob/242f3c62ba1ceee0a3633045fc4fd9277cb86cd3/2.4/Dockerfile) runs on Debian, so I changed it to RHEL and looked at it. It almost started moving.
+##[ Official Apache docker image](https://github.com/docker-library/httpd/blob/242f3c62ba1ceee0a3633045fc4fd9277cb86cd3/2.4/Dockerfile) runs on Debian, so I changed it to RHEL and looked at it. It almost started moving.
 As mentioned above, there are some packages that are not compatible.
 
 
-##Debian系とRHEL系でのパッケージの違いをchatgptに聞いた結果を整理(誤りある可能性有り)
+## Debian系とRHEL系でのパッケージの違いをchatgptに聞いた結果を整理(誤りある可能性有り)
 | Debian系           | RHEL系              | 説明                                                                                                      |
 |-------------------|--------------------|---------------------------------------------------------------------------------------------------------|
 | ca-certificates   | ca-certificates    | SSL証明書のコレクション。両方のディストリビューションで利用可能。                                                  |
