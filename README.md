@@ -6,6 +6,10 @@
 As mentioned above, there are some packages that are not compatible.
 
 
+- コンテナの起動方法
+  - 本プロジェクトをローカルにクローン後、`Docker_SimpleApache/docker/`にディレクトリを移動し、イメージをビルドし、コンテナ起動するとApacheコンテナが起動する。
+
+
 - Debian系とRHEL系でのパッケージの違いをchatgptに聞いた結果を整理(誤りある可能性有り)
 
 
